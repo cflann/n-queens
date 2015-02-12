@@ -78,6 +78,10 @@
     // --------------------------------------------------------------
     //
     // test if a specific row on this board contains a conflict
+    _copy: function() {
+      return new Board(_.map(this.rows(), function(x){ return x.slice()}));
+    },
+
     hasRowConflictAt: function(rowIndex) {
       var row = this.get(rowIndex);
       return _.reduce(row, function(count, cell) {
@@ -130,7 +134,7 @@
         j++;
       }
       while (i < n && j < n) {
-        count += this.get(i++)[j++];
+        count += this.get(j++)[i++];
       }
       return count > 1;
     },
