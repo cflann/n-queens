@@ -15,9 +15,11 @@
 
 window.findNRooksSolution = function(n) {
 
-  var getRandomInt = function(n){
-    return Math.floor(n * Math.random());
-  }
+  var getRandomInt = function(n, pos){
+    var rand = Math.floor(n * Math.random());
+    return (rand === pos) ? getRandomInt(n, pos) : rand;
+  };
+  
   var solution = [];
 
   var reference = [];
@@ -54,8 +56,57 @@ window.countNRooksSolutions = function(n) {
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that none of them can attack each other
 window.findNQueensSolution = function(n) {
-  var solution = undefined;
+  
+  var temp = function(round) {
+    return 100 / round;
+  };
 
+  // Initialize board with a n rook solution
+  var board = new Board(findNRooksSolution());
+  var queens = [];
+  for (var i = 0; i < n; i++) {
+    queens.push([i, board.get(i).indexOf(1)]);
+  }
+
+  var getAttackedQueenIndex = function() {
+    
+  };
+
+  var cost = function(row, from, to) {
+    var before = board.numQueenConflicts();
+    board.move(row, from, to);
+    var after = board.numQueenConflicts();
+    board.move(row, to, from);
+    return after - before;
+  };
+  
+  var move = function(row, from, to) {
+    board.togglePiece(row, from);
+    board.togglePiece(row, to);
+  };
+
+  var P = function(cost) {
+    return Math.exp(-cost/temp);
+  };
+  
+  var round = function() {
+    var attackedQueenIndex = getAttackedQueenIndex();
+    if (attackedQueenIndex === undefined) {
+      return board;
+    } else {
+      // if random move improves board, take it
+      var moveCol = getRandomInt(n, attackedQueenIndex);
+      var cost = cost(attackedQueenIndex[0], attackedQueenIndex[1], moveCol);
+      if (cost < 0) {
+        move(attackedQueenIndex[0], attackedQueenIndex[1], moveCol);
+      } else {
+        // if not, take it with probability P
+        if (Math.random() < P(cost)) {
+          move(attackedQueenIndex[0], attackedQueenIndex[1], moveCol);
+        }
+      }
+    }
+  };
 
   console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
   return solution;
